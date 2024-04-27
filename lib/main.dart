@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:indoor_explorer_client/screens/navigate.dart';
 import 'screens/find_my_location.dart';
 import 'screens/get_started_screen.dart';
 import 'screens/home.dart';
@@ -19,8 +20,8 @@ class MyApp extends StatelessWidget {
       routes: <String, WidgetBuilder>{
         '/get_started_screen': (context) => const GetStartedScreen(),
         '/home': (context) => const Home(),
-        '/find_my_location': (context) => Navigation(),
-        //'/navigate': (context) => const NavigateScreen(),
+        '/find_my_location': (context) => MyLocation(),
+        '/navigate': (context) => Navigation(),
       },
     );
   }

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class Home extends StatelessWidget {
   const Home({super.key});
 
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -60,7 +59,7 @@ class Home extends StatelessWidget {
                   width: 250,
                   child: ElevatedButton(
                     onPressed: () {
-                      //Navigator.of(context).pushNamed('/navigate');
+                      Navigator.of(context).pushNamed('/navigate');
                     },
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF8D95FF)),

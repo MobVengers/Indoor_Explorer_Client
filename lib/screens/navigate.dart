@@ -4,14 +4,14 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:wifi_scan/wifi_scan.dart';
 
-class MyLocation extends StatefulWidget {
-  const MyLocation({super.key});
+class Navigation extends StatefulWidget {
+  const Navigation({super.key});
 
   @override
-  State<MyLocation> createState() => _MyLocationState();
+  State<Navigation> createState() => _NavigationState();
 }
 
-class _MyLocationState extends State<MyLocation> {
+class _NavigationState extends State<Navigation> {
   Offset markerPosition = Offset(120, 620);
   int n = 0;
   List<Map<String, dynamic>> mapCalibrations = [];
@@ -99,30 +99,30 @@ class _MyLocationState extends State<MyLocation> {
                 width: double.infinity,
                 height: double.infinity,
               ),
-              Positioned(
-                left: markerPosition.dx,
-                top: markerPosition.dy,
-                child: Transform.rotate(
-                  angle: angle,
-                  child: Icon(
-                    FontAwesomeIcons.mapPin,
-                    color: Colors.red,
-                    size: 30,
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 20,
-                right: 10,
-                child: FloatingActionButton(
-                  onPressed: getWifiAccessPoints,
-                  child: Icon(
-                    Icons.search,
-                    color: Colors.white,
-                  ),
-                  backgroundColor: Colors.black,
-                ),
-              ),
+              // Positioned(
+              //   left: markerPosition.dx,
+              //   top: markerPosition.dy,
+              //   child: Transform.rotate(
+              //     angle: angle,
+              //     child: Icon(
+              //       FontAwesomeIcons.mapPin,
+              //       color: Colors.red,
+              //       size: 30,
+              //     ),
+              //   ),
+              // ),
+              // Positioned(
+              //   top: 20,
+              //   right: 10,
+              //   child: FloatingActionButton(
+              //     onPressed: getWifiAccessPoints,
+              //     child: Icon(
+              //       Icons.search,
+              //       color: Colors.white,
+              //     ),
+              //     backgroundColor: Colors.black,
+              //   ),
+              // ),
               // Positioned(
               //   top: 80,
               //   right: 10,
