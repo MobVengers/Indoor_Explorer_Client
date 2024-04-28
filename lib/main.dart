@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:indoor_explorer_client/screens/calibrate.dart';
 import 'package:indoor_explorer_client/screens/navigate.dart';
 import 'screens/find_my_location.dart';
 import 'screens/get_started_screen.dart';
@@ -13,6 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Get Started Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -22,6 +24,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const Home(),
         '/find_my_location': (context) => MyLocation(),
         '/navigate': (context) => Navigation(),
+        '/calibrate': (context) => Calibration(),
       },
     );
   }

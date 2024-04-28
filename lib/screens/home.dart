@@ -25,10 +25,15 @@ class Home extends StatelessWidget {
               children: <Widget>[
                 const SizedBox(height: 20),
                 Image.asset(
+                  "assets/stickers/welcome_message.png",
+                  height: 70,
+                ),
+                const SizedBox(height: 20),
+                Image.asset(
                   "assets/stickers/home_image_1.png",
                   height: 300,
                 ),
-                const SizedBox(height: 80),
+                const SizedBox(height: 40),
                 SizedBox(
                   width: 250,
                   child: ElevatedButton(
@@ -71,6 +76,32 @@ class Home extends StatelessWidget {
                         SizedBox(width: 15),  // Space between icon and text
                         Text(
                           'Navigate',
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.white
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                SizedBox(
+                  width: 250,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/calibrate');
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF8D95FF)),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,  // Ensure the Row only takes as much space as needed
+                      children: [
+                        Icon(Icons.compass_calibration, color: Colors.white),  // Search icon with white color
+                        SizedBox(width: 15),  // Space between icon and text
+                        Text(
+                          'Calibrate',
                           style: TextStyle(
                               fontSize: 18,
                               color: Colors.white

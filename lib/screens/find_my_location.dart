@@ -1,8 +1,12 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:wifi_scan/wifi_scan.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
 
 class MyLocation extends StatefulWidget {
   const MyLocation({super.key});
@@ -12,22 +16,35 @@ class MyLocation extends StatefulWidget {
 }
 
 class _MyLocationState extends State<MyLocation> {
-  Offset markerPosition = Offset(120, 620);
-  int n = 0;
-  List<Map<String, dynamic>> mapCalibrations = [];
+  Offset markerPosition = Offset(0, 0);
   double angle = 0;
-  List<dynamic> wifiList = [];
+  List<WiFiAccessPoint> wifiResults = [];
   String indoorMap = 'assets/maps/sumanadasa_second_floor.png';
+  late double myX;
+  late double myY;
+  bool isLocationDataReceived = false;
+  ValueNotifier<bool> isLocationDataReceivedNotifier = ValueNotifier<bool>(false);
+  Timer? _timer;
+
 
   @override
   void initState() {
     super.initState();
+    isLocationDataReceived = false;
     requestLocationPermission();
-    mapCalibrations.add({
-      'projectId': 0,
-      'CalibrationPointId': n,
-      'received_signals': [],
-      'position': {'x': 120, 'y': 300}
+    getWifiAccessPoints();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
+      getWifiAccessPoints();
     });
   }
 
@@ -45,26 +62,25 @@ class _MyLocationState extends State<MyLocation> {
   Future<void> getWifiAccessPoints() async {
     if (Platform.isAndroid) {
       if (await requestLocationPermission()) {
-        var wifiResults = await WiFiScan.instance.getScannedResults();
+        wifiResults = await WiFiScan.instance.getScannedResults();
         if(wifiResults.isNotEmpty){
           print("Yayyy!!! non-empty wifi list\n");
           for (var wifi in wifiResults) {
             print("SSID: ${wifi.ssid}");
-            print("BSSID: ${wifi.bssid}"); // MAC address
-            print("Channel Width: ${wifi.channelWidth}");
+            print("BSSID: ${wifi.bssid}");
             print("Level: ${wifi.level}");
-            print("Capabilities: ${wifi.capabilities}");
-            print("Frequency: ${wifi.frequency}");
-            print("centerFrequency0: ${wifi.centerFrequency0}");
-            print("centerFrequency1: ${wifi.centerFrequency1}");
-            print("is80211mcResponder: ${wifi.is80211mcResponder}");
-            print("isPasspoint: ${wifi.isPasspoint}");
-            print("operatorFriendlyName: ${wifi.operatorFriendlyName}");
-            print("standard: ${wifi.standard}");
-            print("timestamp: ${wifi.timestamp}");
-            print("venueName: ${wifi.venueName}");
             print("-------------------------");
           }
+
+          await sendWifiAccessPoints(
+            projectId: '0',
+            receivedSignals: wifiResults.map((signal) => {
+              'bssid': signal.bssid,
+              'ssid': signal.ssid,
+              'rssi': signal.level,
+            }).toList(),
+          );
+
         } else {
           print("empty wifi list");
         }
@@ -76,78 +92,114 @@ class _MyLocationState extends State<MyLocation> {
     }
   }
 
-  // void handleDownload() async {
-  //   final directory = await getApplicationDocumentsDirectory();
-  //   final file = File('${directory.path}/mapCalibrations.txt');
-  //   await file.writeAsString('Data to be written');
-  //   print('File written at ${file.path}');
-  // }
+  Future<void> sendWifiAccessPoints({
+    required String projectId,
+    required List<Map<String, dynamic>> receivedSignals,}) async {
+    final url = Uri.parse('https://indoor-explorer-server.onrender.com/mylocation');
+    final body = {
+      'projectId': projectId,
+      'received_signals': receivedSignals.map((signal) => {
+        'bssid': signal['bssid'],
+        'ssid': signal['ssid'],
+        'rssi': signal['rssi'],
+      }).toList(),
+    };
+
+    print(body);
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200) {
+        print('Data sent successfully');
+        print('Response body: ${response.body}');
+
+        final data = jsonDecode(response.body);
+        final message = data['message'];
+
+        if (message != null && message is Map<String, dynamic>) {
+          if (message != null) {
+            setState(() {
+              myX = message['x'];
+              myY = message['y'];
+              final floor = message['floor'];
+              isLocationDataReceived = true;
+              markerPosition = Offset(myX, myY);
+
+              print('my X: $myX, my Y: $myY, Floor: $floor');
+              print("marker position changed : ${markerPosition.dx} and ${markerPosition.dy}");
+              print("Location data received = $isLocationDataReceived");
+            });
+          } else {
+            print('Failed to get location data');
+          }
+
+      } else {
+        // Error sending data
+        print('Error sending data: ${response.statusCode}');
+      }
+    } } catch (e) {
+      // Error occurred
+      print('Error occurred: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
+          title: Text("Find My Location", style: TextStyle(color: Colors.white),),
           backgroundColor: const Color(0xFF8D95FF),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white,),
-            onPressed: (){
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
               Navigator.of(context).pushNamed('/home');
             },
           ),
         ),
-        body: GestureDetector(
-          onPanUpdate: (details) {
-            setState(() {
-              markerPosition = details.localPosition;
-            });
-          },
-          child: Stack(
-            children: <Widget>[
-              Image.asset(
-                indoorMap,
-                fit: BoxFit.fitHeight,
-                width: double.infinity,
-                height: double.infinity,
+        body: Stack(
+          children: <Widget>[
+            Image.asset(
+              indoorMap,
+              fit: BoxFit.fitHeight,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+            Positioned(
+              left: markerPosition.dx,
+              top: markerPosition.dy,
+              child: ValueListenableBuilder<bool>(
+                valueListenable: isLocationDataReceivedNotifier,
+                builder: (context, isLocationDataReceived, child) {
+                  return Transform.rotate(
+                    angle: angle,
+                    child: Icon(
+                      Icons.location_on_outlined,
+                      color: isLocationDataReceived ? Colors.red : Colors.red,
+                      size: 30,
+                    ),
+                  );
+                },
               ),
-              Positioned(
-                left: markerPosition.dx,
-                top: markerPosition.dy,
-                child: Transform.rotate(
-                  angle: angle,
-                  child: Icon(
-                    FontAwesomeIcons.mapPin,
-                    color: Colors.red,
-                    size: 30,
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 20,
-                right: 10,
-                child: FloatingActionButton(
-                  onPressed: getWifiAccessPoints,
-                  child: Icon(
-                    Icons.search,
-                    color: Colors.white,
-                  ),
-                  backgroundColor: Colors.black,
-                ),
-              ),
-              // Positioned(
-              //   top: 80,
-              //   right: 10,
-              //   child: FloatingActionButton(
-              //     onPressed: handleDownload,
-              //     child: Icon(
-              //       Icons.download,
-              //       color: Colors.white,
-              //     ),
-              //     backgroundColor: Colors.black,
-              //   ),
-              // ),
-            ],
-          ),
+            ),
+            // Positioned(
+            //   top: 20,
+            //   right: 10,
+            //   child: FloatingActionButton(
+            //     onPressed: getWifiAccessPoints,
+            //     child: Icon(
+            //       Icons.search,
+            //       color: Colors.white,
+            //     ),
+            //     backgroundColor: Color(0xFF8D95FF),
+            //   ),
+            // ),
+          ],
         ),
       ),
     );
