@@ -51,7 +51,18 @@ class _MyLocationState extends State<MyLocation> {
           for (var wifi in wifiResults) {
             print("SSID: ${wifi.ssid}");
             print("BSSID: ${wifi.bssid}"); // MAC address
-            print("Signal Strength (dBm): ${wifi.level}");
+            print("Channel Width: ${wifi.channelWidth}");
+            print("Level: ${wifi.level}");
+            print("Capabilities: ${wifi.capabilities}");
+            print("Frequency: ${wifi.frequency}");
+            print("centerFrequency0: ${wifi.centerFrequency0}");
+            print("centerFrequency1: ${wifi.centerFrequency1}");
+            print("is80211mcResponder: ${wifi.is80211mcResponder}");
+            print("isPasspoint: ${wifi.isPasspoint}");
+            print("operatorFriendlyName: ${wifi.operatorFriendlyName}");
+            print("standard: ${wifi.standard}");
+            print("timestamp: ${wifi.timestamp}");
+            print("venueName: ${wifi.venueName}");
             print("-------------------------");
           }
         } else {
