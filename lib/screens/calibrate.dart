@@ -96,8 +96,14 @@ class _CalibrationState extends State<Calibration> {
   Future<void> getWifiAccessPoints() async {
     if (Platform.isAndroid) {
       if (await requestLocationPermission()) {
-        wifiResults = await WiFiScan.instance.getScannedResults();
-        wifiResults = wifiResults.where((wifi) => wifi.ssid == 'UoM_Wireless').toList();   // TODO
+        // Clear the previous results before scanning for new access points
+        wifiResults.clear();
+
+        // Perform a new Wi-Fi scan
+        List<WiFiAccessPoint> scannedResults = await WiFiScan.instance.getScannedResults();
+
+        // Filter the results for the desired SSID
+        wifiResults = scannedResults.where((wifi) => wifi.ssid == 'UoM_Wireless').toList();
 
         if (wifiResults.isNotEmpty) {
           // Show the WiFi list popup

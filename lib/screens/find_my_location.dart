@@ -62,6 +62,7 @@ class _MyLocationState extends State<MyLocation> {
   Future<void> _getWifiAccessPoints() async {
     if (Platform.isAndroid) {
       if (await requestLocationPermission()) {
+        print(wifiResults);
         // Clear the previous results before scanning for new access points
         wifiResults.clear();
 
