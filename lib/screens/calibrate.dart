@@ -51,7 +51,15 @@ class _CalibrationState extends State<Calibration> {
   Future<void> findMyLocation() async {
     if (Platform.isAndroid) {
       if (await requestLocationPermission()) {
-        wifiResults = await WiFiScan.instance.getScannedResults();
+        // Clear the previous results before scanning for new access points
+        wifiResults.clear();
+
+        // Perform a new Wi-Fi scan
+        List<WiFiAccessPoint> scannedResults = await WiFiScan.instance.getScannedResults();
+
+        // Filter the results for the desired SSID
+        wifiResults = scannedResults.where((wifi) => wifi.ssid == 'UoM_Wireless').toList();
+
         if(wifiResults.isNotEmpty){
           print("Yayyy!!! non-empty wifi list\n");
           for (var wifi in wifiResults) {
@@ -89,6 +97,8 @@ class _CalibrationState extends State<Calibration> {
     if (Platform.isAndroid) {
       if (await requestLocationPermission()) {
         wifiResults = await WiFiScan.instance.getScannedResults();
+        wifiResults = wifiResults.where((wifi) => wifi.ssid == 'UoM_Wireless').toList();   // TODO
+
         if (wifiResults.isNotEmpty) {
           // Show the WiFi list popup
           showDialog(
@@ -110,7 +120,8 @@ class _CalibrationState extends State<Calibration> {
     required String projectId,
     required double posX,
     required double posY,
-    required List<Map<String, dynamic>> receivedSignals,}) async {
+    required List<Map<String, dynamic>> receivedSignals,
+  }) async {
     final url = Uri.parse('https://indoor-explorer-server.onrender.com/fingerprint/create');
     final body = {
       'projectId': projectId,
@@ -122,6 +133,7 @@ class _CalibrationState extends State<Calibration> {
         'rssi': signal['rssi'],
       }).toList(),
     };
+    print(body);
 
     try {
       final response = await http.post(
@@ -133,13 +145,52 @@ class _CalibrationState extends State<Calibration> {
       if (response.statusCode == 200) {
         // Data sent successfully
         print('Data sent successfully');
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Success'),
+            content: Text('Calibration points sent successfully.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
       } else {
         // Error sending data
         print('Error sending data: ${response.statusCode}');
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Error'),
+            content: Text('Error sending calibration points. Please try again.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('Cancel'),
+              ),
+            ],
+          ),
+        );
       }
     } catch (e) {
       // Error occurred
       print('Error occurred: $e');
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Error'),
+          content: Text('Error occurred: $e'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel'),
+            ),
+          ],
+        ),
+      );
     }
   }
 

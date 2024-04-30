@@ -32,7 +32,7 @@ class _MyLocationState extends State<MyLocation> {
     super.initState();
     isLocationDataReceived = false;
     requestLocationPermission();
-    getWifiAccessPoints();
+    _getWifiAccessPoints();
     _startTimer();
   }
 
@@ -44,7 +44,7 @@ class _MyLocationState extends State<MyLocation> {
 
   void _startTimer() {
     _timer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
-      getWifiAccessPoints();
+      _getWifiAccessPoints();
     });
   }
 
@@ -59,11 +59,19 @@ class _MyLocationState extends State<MyLocation> {
     }
   }
 
-  Future<void> getWifiAccessPoints() async {
+  Future<void> _getWifiAccessPoints() async {
     if (Platform.isAndroid) {
       if (await requestLocationPermission()) {
-        wifiResults = await WiFiScan.instance.getScannedResults();
-        if(wifiResults.isNotEmpty){
+        // Clear the previous results before scanning for new access points
+        wifiResults.clear();
+
+        // Perform a new Wi-Fi scan
+        List<WiFiAccessPoint> scannedResults = await WiFiScan.instance.getScannedResults();
+
+        // Filter the results for the desired SSID
+        wifiResults = scannedResults.where((wifi) => wifi.ssid == 'UoM_Wireless').toList();
+
+        if (wifiResults.isNotEmpty) {
           print("Yayyy!!! non-empty wifi list\n");
           for (var wifi in wifiResults) {
             print("SSID: ${wifi.ssid}");
@@ -71,7 +79,6 @@ class _MyLocationState extends State<MyLocation> {
             print("Level: ${wifi.level}");
             print("-------------------------");
           }
-
           await sendWifiAccessPoints(
             projectId: '0',
             receivedSignals: wifiResults.map((signal) => {
@@ -80,7 +87,6 @@ class _MyLocationState extends State<MyLocation> {
               'rssi': signal.level,
             }).toList(),
           );
-
         } else {
           print("empty wifi list");
         }
@@ -158,6 +164,7 @@ class _MyLocationState extends State<MyLocation> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () {
+              dispose();
               Navigator.of(context).pushNamed('/home');
             },
           ),
