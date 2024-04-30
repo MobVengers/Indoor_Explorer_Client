@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'wifi_list_popup.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:wifi_scan/wifi_scan.dart';
 import 'dart:convert';
@@ -73,6 +74,27 @@ class _CalibrationState extends State<Calibration> {
             }).toList(),
           );
 
+        } else {
+          print("empty wifi list");
+        }
+      } else {
+        print("Permission denied");
+      }
+    } else {
+      print("Permission denied for ios");
+    }
+  }
+
+  Future<void> getWifiAccessPoints() async {
+    if (Platform.isAndroid) {
+      if (await requestLocationPermission()) {
+        wifiResults = await WiFiScan.instance.getScannedResults();
+        if (wifiResults.isNotEmpty) {
+          // Show the WiFi list popup
+          showDialog(
+            context: context,
+            builder: (context) => WifiListPopup(wifiResults: wifiResults),
+          );
         } else {
           print("empty wifi list");
         }
@@ -170,6 +192,18 @@ class _CalibrationState extends State<Calibration> {
                   onPressed: findMyLocation,
                   child: Icon(
                     Icons.send,
+                    color: Colors.white,
+                  ),
+                  backgroundColor: Color(0xFF8D95FF),
+                ),
+              ),
+              Positioned(
+                top: 100,
+                right: 10,
+                child: FloatingActionButton(
+                  onPressed: getWifiAccessPoints,
+                  child: Icon(
+                    Icons.wifi_find_sharp,
                     color: Colors.white,
                   ),
                   backgroundColor: Color(0xFF8D95FF),

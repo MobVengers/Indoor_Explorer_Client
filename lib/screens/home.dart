@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'calibrate_popup.dart'; // Import the CalibratePopup widget
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -10,18 +11,17 @@ class Home extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: const Color(0xFF8D95FF),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white,),
-            onPressed: (){
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
               Navigator.of(context).pushNamed('/get_started_screen');
-              //Navigator.pop(context, GetStartedScreen());
             },
           ),
         ),
         body: SingleChildScrollView(
-          child: Center( // Wrap the Column with a Center widget
+          child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center, // Ensure children are centered horizontally
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 const SizedBox(height: 20),
                 Image.asset(
@@ -41,13 +41,14 @@ class Home extends StatelessWidget {
                       Navigator.of(context).pushNamed('/find_my_location');
                     },
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF8D95FF)),
+                      backgroundColor:
+                      MaterialStateProperty.all<Color>(const Color(0xFF8D95FF)),
                     ),
                     child: const Row(
-                      mainAxisSize: MainAxisSize.min,  // Ensure the Row only takes as much space as needed
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.my_location_outlined, color: Colors.white),  // Search icon with white color
-                        SizedBox(width: 15),  // Space between icon and text
+                        Icon(Icons.my_location_outlined, color: Colors.white),
+                        SizedBox(width: 15),
                         Text(
                           'Find My Location',
                           style: TextStyle(
@@ -67,13 +68,14 @@ class Home extends StatelessWidget {
                       Navigator.of(context).pushNamed('/navigate');
                     },
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF8D95FF)),
+                      backgroundColor:
+                      MaterialStateProperty.all<Color>(const Color(0xFF8D95FF)),
                     ),
                     child: const Row(
-                      mainAxisSize: MainAxisSize.min,  // Ensure the Row only takes as much space as needed
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.navigation_outlined, color: Colors.white),  // Search icon with white color
-                        SizedBox(width: 15),  // Space between icon and text
+                        Icon(Icons.navigation_outlined, color: Colors.white),
+                        SizedBox(width: 15),
                         Text(
                           'Navigate',
                           style: TextStyle(
@@ -90,16 +92,20 @@ class Home extends StatelessWidget {
                   width: 250,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).pushNamed('/calibrate');
+                      showDialog(
+                        context: context,
+                        builder: (context) => CalibratePopup(),
+                      );
                     },
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF8D95FF)),
+                      backgroundColor:
+                      MaterialStateProperty.all<Color>(const Color(0xFF8D95FF)),
                     ),
                     child: const Row(
-                      mainAxisSize: MainAxisSize.min,  // Ensure the Row only takes as much space as needed
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.compass_calibration, color: Colors.white),  // Search icon with white color
-                        SizedBox(width: 15),  // Space between icon and text
+                        Icon(Icons.compass_calibration, color: Colors.white),
+                        SizedBox(width: 15),
                         Text(
                           'Calibrate',
                           style: TextStyle(
